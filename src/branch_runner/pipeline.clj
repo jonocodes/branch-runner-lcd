@@ -30,13 +30,13 @@
   (+ 6000 (rand-int 5000)))
 
 (defn get-running-branches []
-  (let [docker-list (clojure.string/replace (:out (sh "sh" "-c" "docker ps --format '{{.Names}}\t{{.Ports}}' | grep _web_1 | sed 's/_web_1//' | sed 's/0.0.0.0://' | sed 's/->.*//'")) #"\n" "\t")]
+  (let [docker-list (clojure.string/replace (:out (sh "sh" "-c" "docker ps --format '{{.Names}}\t{{.Ports}}' | grep _akita_1 | sed 's/_akita_1//' | sed 's/0.0.0.0://' | sed 's/->.*//'")) #"\n" "\t")]
     (if (= 0 (count docker-list)) {}
       (apply hash-map (.split docker-list"\t")))))
 
 (defn get-remote-branches []  ; TODO: fetch from github
   (map #(get % "name")
-    (json/read-str (slurp (str lambdacd-project-dir "/api-fetch-temp.json")))))
+    (json/read-str (slurp (str lambdacd-project-dir "/api-fetch-temp-akita.json")))))
 
 (defn docker-namify [branch]  ; turn into a name that is a valid for a docker container
   (clojure.string/replace branch #"[^a-zA-Z0-9_]" ""))

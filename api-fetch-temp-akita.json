@@ -1,0 +1,93 @@
+[
+  {
+    "name": "PS-1199",
+    "commit": {
+      "sha": "7a016e49f73bcd38486668ce22377e89a244d6f2",
+      "url": "https://api.github.com/repos/PLOS/akita/commits/7a016e49f73bcd38486668ce22377e89a244d6f2"
+    }
+  },
+  {
+    "name": "dev-CAS-DOCKER",
+    "commit": {
+      "sha": "d2a23b9bc9f6fa31008f0e524a85d8e2e708f80a",
+      "url": "https://api.github.com/repos/PLOS/akita/commits/d2a23b9bc9f6fa31008f0e524a85d8e2e708f80a"
+    }
+  },
+  {
+    "name": "dev-PS-684",
+    "commit": {
+      "sha": "42c5597e1df61c416f19cba266106751497d740b",
+      "url": "https://api.github.com/repos/PLOS/akita/commits/42c5597e1df61c416f19cba266106751497d740b"
+    }
+  },
+  {
+    "name": "dev-PS-685",
+    "commit": {
+      "sha": "5b7049471b3699ed8582650fb6fa5fb5694d9a7e",
+      "url": "https://api.github.com/repos/PLOS/akita/commits/5b7049471b3699ed8582650fb6fa5fb5694d9a7e"
+    }
+  },
+  {
+    "name": "develop",
+    "commit": {
+      "sha": "b42c49594fc69b1bd8a6680ce9d769c454b7b22c",
+      "url": "https://api.github.com/repos/PLOS/akita/commits/b42c49594fc69b1bd8a6680ce9d769c454b7b22c"
+    }
+  },
+  {
+    "name": "feature/PS-1108_fix_missing_email",
+    "commit": {
+      "sha": "e19fa99846573faeec7ef8a90a2e5acd267fa193",
+      "url": "https://api.github.com/repos/PLOS/akita/commits/e19fa99846573faeec7ef8a90a2e5acd267fa193"
+    }
+  },
+  {
+    "name": "master",
+    "commit": {
+      "sha": "a05c555b2eca3ac99c72352efe3f163e867e1ebf",
+      "url": "https://api.github.com/repos/PLOS/akita/commits/a05c555b2eca3ac99c72352efe3f163e867e1ebf"
+    }
+  },
+  {
+    "name": "postfix_update",
+    "commit": {
+      "sha": "6ad8e0ba2a8c1dc0a9327d4161230fdb3a4abf7e",
+      "url": "https://api.github.com/repos/PLOS/akita/commits/6ad8e0ba2a8c1dc0a9327d4161230fdb3a4abf7e"
+    }
+  },
+  {
+    "name": "release-0.9.0",
+    "commit": {
+      "sha": "0a0756667fb5469d763205d73bea390cfc17fc8c",
+      "url": "https://api.github.com/repos/PLOS/akita/commits/0a0756667fb5469d763205d73bea390cfc17fc8c"
+    }
+  },
+  {
+    "name": "simple-auth-custom",
+    "commit": {
+      "sha": "1cca4678d25841f819aafe4396acb3d15f004667",
+      "url": "https://api.github.com/repos/PLOS/akita/commits/1cca4678d25841f819aafe4396acb3d15f004667"
+    }
+  },
+  {
+    "name": "simple-auth-pivotal",
+    "commit": {
+      "sha": "03329ab389c9c3dfca691d30c0c365821a856a61",
+      "url": "https://api.github.com/repos/PLOS/akita/commits/03329ab389c9c3dfca691d30c0c365821a856a61"
+    }
+  },
+  {
+    "name": "simple-auth",
+    "commit": {
+      "sha": "1d3168f174217020037530a8ebbf894e3d6357d5",
+      "url": "https://api.github.com/repos/PLOS/akita/commits/1d3168f174217020037530a8ebbf894e3d6357d5"
+    }
+  },
+  {
+    "name": "swagger-rails",
+    "commit": {
+      "sha": "7a86a5c32a09a7aadb84e689010c66c65611ba08",
+      "url": "https://api.github.com/repos/PLOS/akita/commits/7a86a5c32a09a7aadb84e689010c66c65611ba08"
+    }
+  }
+]

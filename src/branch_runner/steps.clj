@@ -16,7 +16,7 @@
 
 (defn build-docker-image [args ctx]
   (shell/bash ctx lambdacd-dockerfiles-dir
-    "docker build -t lcdapp ."))
+    "projects/akita/build-image.sh"))
 
 (defn start-docker [branch port]
   (fn [args ctx]
