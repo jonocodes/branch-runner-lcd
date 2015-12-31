@@ -20,37 +20,34 @@
         [clojure.data.json :as json])
   (:gen-class))
 
-(def running-branches
-  []
-  )
+(defn parse-int [s]
+  (Integer. (re-find #"[0-9]*" s)))
 
-(println (count (clojure.string/split-lines (:out (sh "sh" "-c" "docker ps --format '{{.Names}}\t{{.Ports}}' | grep _web_1 | sed 's/_web_1//' | sed 's/0.0.0.0://' | sed 's/->.*//'")))))
+(defn get-running-branches []
+  (apply hash-map (.split (clojure.string/replace (:out (sh "sh" "-c" "docker ps --format '{{.Names}}\t{{.Ports}}' | grep _web_1 | sed 's/_web_1//' | sed 's/0.0.0.0://' | sed 's/->.*//'")) #"\n" "\t") "\t")))
 
-; docker ps --format '{{.Names}}\t{{.Ports}} | grep _web_1 | sed 's/0.0.0.0\:\([0-9]\+\)->5000\/tcp/\1/' | sed 's/_web_1//'
-
-(def remote-branches
+(defn get-remote-branches []
   (map #(get % "name")
-  (json/read-str (slurp (str lambdacd-project-dir "/api-fetch-temp.json")))
-))
+  (json/read-str (slurp (str lambdacd-project-dir "/api-fetch-temp.json")))))
 
-(print remote-branches)
+(defn docker-namify [branch]
+  (clojure.string/replace branch #"[^a-zA-Z0-9_]" ""))
+
+(println "running branches: " (get-running-branches))
+
+(println "remote branches: " (get-remote-branches))
+
 
 (defn mk-projects []
-  [
-  {
-    :pipeline-url "/develop"
-    :branch "develop"
-    :port   2222}
-  {
-    :pipeline-url "/feature-foo"
-    :branch "feature-foo"
-    :port   3333}
-  {
-    :pipeline-url (str (new java.util.Date))
-    :branch "now"
-    :port 4444
-  }
-])
+  (let [running-branches (get-running-branches)]
+    (map #(hash-map
+      :pipeline-url (format "/%s" %)
+      :branch %
+      :port (if (= nil (get running-branches (docker-namify %)))
+        1000    ; TODO: use random port
+        (parse-int (get running-branches (docker-namify %)))
+        )) (get-remote-branches))
+    ))
 
 (defn mk-pipeline-def [{branch :branch port :port}]
   `(
