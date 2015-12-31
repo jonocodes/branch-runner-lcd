@@ -23,20 +23,24 @@
 (defn parse-int [s]
   (Integer. (re-find #"[0-9]*" s)))
 
+(defn get-unused-port []  ; TODO: choose unused port
+  (+ 6000 (rand-int 5000)))
+
 (defn get-running-branches []
-  (apply hash-map (.split (clojure.string/replace (:out (sh "sh" "-c" "docker ps --format '{{.Names}}\t{{.Ports}}' | grep _web_1 | sed 's/_web_1//' | sed 's/0.0.0.0://' | sed 's/->.*//'")) #"\n" "\t") "\t")))
+  (let [docker-list (clojure.string/replace (:out (sh "sh" "-c" "docker ps --format '{{.Names}}\t{{.Ports}}' | grep _web_1 | sed 's/_web_1//' | sed 's/0.0.0.0://' | sed 's/->.*//'")) #"\n" "\t")]
+    (if (= 0 (count docker-list)) {}
+      (apply hash-map (.split docker-list"\t")))))
 
 (defn get-remote-branches []
   (map #(get % "name")
-  (json/read-str (slurp (str lambdacd-project-dir "/api-fetch-temp.json")))))
+    (json/read-str (slurp (str lambdacd-project-dir "/api-fetch-temp.json")))))
 
-(defn docker-namify [branch]
+(defn docker-namify [branch]  ; turn into a name that is a valid for a docker container
   (clojure.string/replace branch #"[^a-zA-Z0-9_]" ""))
 
 (println "running branches: " (get-running-branches))
 
 (println "remote branches: " (get-remote-branches))
-
 
 (defn mk-projects []
   (let [running-branches (get-running-branches)]
@@ -44,10 +48,11 @@
       :pipeline-url (format "/%s" %)
       :branch %
       :port (if (= nil (get running-branches (docker-namify %)))
-        1000    ; TODO: use random port
+        (get-unused-port)
         (parse-int (get running-branches (docker-namify %)))
-        )) (get-remote-branches))
-    ))
+        )
+      :running (not= nil (get running-branches (docker-namify %)))
+    ) (get-remote-branches))))
 
 (defn mk-pipeline-def [{branch :branch port :port}]
   `(
@@ -79,38 +84,39 @@
 (defn mk-contexts []
   (map mk-context (mk-projects)))
 
-;; Nice overview page:
-(defn mk-link [{url :pipeline-url branch :branch port :port}]
-  [:li [:a {:href (str url "/")} branch]
+;; Index page
+(defn mk-link [{pipeline-url :pipeline-url branch :branch port :port running :running}]
+  ; TODO: display date
+  [:li [:a {:href (str pipeline-url "/")} branch]
     " -> "
-    [:a {:href (format "http://localhost:%d" port)} (format "localhost:%d" port)]])
+    (if running
+      [:a {:href (format "http://localhost:%d" port)} (format "localhost:%d" port)]
+      "not running")])
 
 (defn mk-index []
-  ; (println "Index projects: ")
-  ; (println (mk-projects))
   (h/html
     [:html
      [:head
+      [:meta {:HTTP-EQUIV "refresh" :CONTENT "2"}]
       [:title service-name " Pipelines"]]
      [:body
       [:h1 service-name " Pipelines"]
       [:ul (map mk-link (mk-projects))]]]))
 
-(defn branch-page [name]
-  ; (print name)
-  (println "new pipeline: " (pipeline-for {:branch name  :port 4444}))
-  (str "branch " name)
-  ; (pipeline-for {:branch name  :port 4444})
-  )
+(defn branch-page [name] ; TODO: get this to work
+  (println "new pipeline: " name)
+  ; (println (pipeline-for {:branch name  :port (get-unused-port)}))
+  ; (str "branch " name)
+  (pipeline-for {:branch name  :port (get-unused-port)}))
 
 (defn -main [& args]
   (let [
         contexts (map mk-context (mk-projects))
         ; contexts (mk-contexts)
         routes (apply compojure/routes
-                      (conj
-                        contexts
-                        (compojure/GET "/branch/:name" [name] (branch-page name))
-                        (compojure/GET "/" [] (mk-index))))]
+          (conj
+            contexts
+            (compojure/GET "/branch/:name" [name] (branch-page name))
+            (compojure/GET "/" [] (mk-index))))]
        (ring-server/serve routes {:open-browser? false
                                :port 8080})))
