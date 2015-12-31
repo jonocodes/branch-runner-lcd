@@ -23,7 +23,10 @@
 (defn parse-int [s]
   (Integer. (re-find #"[0-9]*" s)))
 
-(defn get-unused-port []  ; TODO: choose unused port
+(defn get-unused-port []
+  ; TODO: choose unused port
+  ; https://github.com/technomancy/server-socket/blob/master/src/server/socket.clj
+  ; http://stackoverflow.com/questions/434718/sockets-discover-port-availability-using-java
   (+ 6000 (rand-int 5000)))
 
 (defn get-running-branches []
@@ -31,7 +34,7 @@
     (if (= 0 (count docker-list)) {}
       (apply hash-map (.split docker-list"\t")))))
 
-(defn get-remote-branches []
+(defn get-remote-branches []  ; TODO: fetch from github
   (map #(get % "name")
     (json/read-str (slurp (str lambdacd-project-dir "/api-fetch-temp.json")))))
 

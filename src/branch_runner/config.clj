@@ -13,7 +13,7 @@
 
 (def local-git-dir (str base-dir "/lcd-test-app"))
 
-(def github-api-branch-list "https://api.github.com/repos/jonocodes/lcd-test-app/branches")
+; (def github-api-branch-list "https://api.github.com/repos/jonocodes/lcd-test-app/branches")
 
 ; (def projects [{:pipeline-url "/develop"
 ;                 :branch "develop"
