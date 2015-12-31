@@ -1,10 +1,11 @@
-(ns test-pipeline.pipeline
+(ns branch-runner.pipeline
   (:use [lambdacd.steps.control-flow]
         [lambdacd.steps.manualtrigger]
-        [test-pipeline.steps]
-        [test-pipeline.config]
+        [branch-runner.steps]
+        [branch-runner.config]
         ; [clojure.tools.logging]
         ; [clj-logging-config.log4j]
+        [clojure.java.io]
         )
   (:require
         [ring.server.standalone :as ring-server]
@@ -16,7 +17,8 @@
         [hiccup.core :as h]
         [clojure.tools.logging :as log]
         [lambdacd.steps.manualtrigger :as manualtrigger]
-        [lambdacd.steps.support :refer [capture-output]])
+        [lambdacd.steps.support :refer [capture-output]]
+        [clojure.data.json :as json])
   (:gen-class)
     ; (:import (org.apache.log4j Logger Level))
     )
@@ -25,6 +27,13 @@
 
 (log/info "info")
 (log/debug "debug")
+
+(def remote-branches
+  (map #(get % "name")
+  (json/read-str (slurp (str lambdacd-project-dir "/api-fetch-temp.json")))
+))
+
+(print remote-branches)
 
 (defn mk-projects []
   [
@@ -38,7 +47,7 @@
     :port   3333}
   {
     :pipeline-url (str (new java.util.Date))
-    :branch "now-test"
+    :branch "now"
     :port 4444
   }
 ])
@@ -48,10 +57,10 @@
     (either
       manualtrigger/wait-for-manual-trigger
       (alias "wait for git repo"
-        (wait-for-testapp-repo ~branch)))
+        (wait-for-remote-repo ~branch)))
     (update-git-repo ~branch)
     (in-parallel
-      build-testapp-image)
+      build-docker-image)
     (stop-docker ~branch ~port)
     (start-docker ~branch ~port)))
 

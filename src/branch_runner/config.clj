@@ -1,12 +1,12 @@
-(ns test-pipeline.config)
+(ns branch-runner.config)
 
 (def service-name "Test App")
 
 (def base-dir "/home/jfinger/ownCloud/lambdaCd/")
 
-(def testapp-repo "git@github.com:jonocodes/lcd-test-app")
+(def remote-repo "git@github.com:jonocodes/lcd-test-app")
 
-(def lambdacd-project-dir (str base-dir "test-pipeline"))
+(def lambdacd-project-dir (str base-dir "branch-runner"))
 
 (def lambdacd-dockerfiles-dir (str base-dir "lcd-test-app"))
 

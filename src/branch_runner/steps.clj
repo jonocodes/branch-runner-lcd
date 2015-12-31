@@ -1,11 +1,11 @@
-(ns test-pipeline.steps
+(ns branch-runner.steps
   (:require [lambdacd.steps.shell :as shell])
   (:require [lambdacd.steps.git :as git])
-  (:use [test-pipeline.config]))
+  (:use [branch-runner.config]))
 
-(defn wait-for-testapp-repo [branch]
+(defn wait-for-remote-repo [branch]
   (fn [args ctx]
-    (git/wait-for-git ctx testapp-repo branch)))
+    (git/wait-for-git ctx remote-repo branch)))
 
 (defn update-git-repo [branch]
   (fn [args ctx]
@@ -14,7 +14,7 @@
       (format "git checkout %s" branch)
       "git pull")))
 
-(defn build-testapp-image [args ctx]
+(defn build-docker-image [args ctx]
   (shell/bash ctx lambdacd-dockerfiles-dir
     "docker build -t lcdapp ."))
 

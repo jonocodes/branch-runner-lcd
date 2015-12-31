@@ -1,6 +1,6 @@
-# test-pipeline
+# branch-runner
 
-A continuous delivery pipeline for FIXME
+A continuous delivery pipeline for running git branches of a web service using LambdaCD.
 
 ## Usage
 

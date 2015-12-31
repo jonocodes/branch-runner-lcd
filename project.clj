@@ -1,6 +1,6 @@
-(defproject test-pipeline "0.1.0-SNAPSHOT"
+(defproject branch-runner "0.1.0-SNAPSHOT"
             :description "Run all the branches of a project as seperate services"
-            :url "http://example.com/FIXME"
+            :url "https://github.com/jonocodes/branch-runner-lcd"
             :dependencies [[lambdacd "0.6.0"]
                            [ring-server "0.3.1"]
                            [org.clojure/clojure "1.7.0"]
@@ -14,6 +14,8 @@
 
                           ;  [ch.qos.logback/logback-core "1.0.13"]
                           ;  [ch.qos.logback/logback-classic "1.0.13"]
+
+                          [org.clojure/data.json "0.2.6"]
                           ]
             :profiles {:uberjar {:aot :all}}
-            :main test-pipeline.pipeline)
+            :main branch-runner.pipeline)
