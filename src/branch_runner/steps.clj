@@ -27,5 +27,6 @@
 (defn stop-docker [branch port]
   (fn [args ctx]
     (shell/bash ctx lambdacd-dockerfiles-dir
+      ; TODO: curry this in with a function and use PORT_HTTP_WEB
       (format "WEB_PORT=%d docker-compose -p %s stop" port branch))
     {:status :success}))
