@@ -3,9 +3,8 @@
         [lambdacd.steps.manualtrigger]
         [branch-runner.steps]
         [branch-runner.config]
-        ; [clojure.tools.logging]
-        ; [clj-logging-config.log4j]
         [clojure.java.io]
+        [clojure.java.shell :only [sh]]
         )
   (:require
         [ring.server.standalone :as ring-server]
@@ -19,14 +18,15 @@
         [lambdacd.steps.manualtrigger :as manualtrigger]
         [lambdacd.steps.support :refer [capture-output]]
         [clojure.data.json :as json])
-  (:gen-class)
-    ; (:import (org.apache.log4j Logger Level))
-    )
+  (:gen-class))
 
-; (.setLevel (Logger/getLogger (str *ns*)) Level/INFO)
+(def running-branches
+  []
+  )
 
-(log/info "info")
-(log/debug "debug")
+(println (count (clojure.string/split-lines (:out (sh "sh" "-c" "docker ps --format '{{.Names}}\t{{.Ports}}' | grep _web_1 | sed 's/_web_1//' | sed 's/0.0.0.0://' | sed 's/->.*//'")))))
+
+; docker ps --format '{{.Names}}\t{{.Ports}} | grep _web_1 | sed 's/0.0.0.0\:\([0-9]\+\)->5000\/tcp/\1/' | sed 's/_web_1//'
 
 (def remote-branches
   (map #(get % "name")
