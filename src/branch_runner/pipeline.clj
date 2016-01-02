@@ -106,11 +106,19 @@
       [:h1 service-name " Pipelines"]
       [:ul (map mk-link (mk-projects))]]]))
 
-(defn branch-page [name] ; TODO: get this to work
+(def branch-pages (atom {}))
+
+(defn create-branch-page [name]
   (println "new pipeline: " name)
-  ; (println (pipeline-for {:branch name  :port (get-unused-port)}))
-  ; (str "branch " name)
-  (pipeline-for {:branch name  :port (get-unused-port)}))
+  (let [pipeline (pipeline-for {:branch name  :port (get-unused-port)})]
+    (swap! branch-pages #(assoc % name pipeline))
+    pipeline))
+
+(defn branch-page [name]
+  (let [existing-branch-page (get @branch-pages name)]
+    (if existing-branch-page
+      existing-branch-page
+      (create-branch-page name))))
 
 (defn -main [& args]
   (let [
@@ -119,7 +127,8 @@
         routes (apply compojure/routes
           (conj
             contexts
-            (compojure/GET "/branch/:name" [name] (branch-page name))
+            (compojure/context "/branch/:name" [name]
+              (branch-page name))
             (compojure/GET "/" [] (mk-index))))]
        (ring-server/serve routes {:open-browser? false
                                :port 8080})))
