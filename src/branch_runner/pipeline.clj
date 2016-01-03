@@ -34,7 +34,7 @@
     (if (= 0 (count docker-list)) {}
       (apply hash-map (.split docker-list"\t")))))
 
-(defn get-remote-branches []  ; TODO: fetch from github
+(defn get-remote-branches []  ; TODO: query git repo with 'branch --remote' instead
   (map #(get % "name")
     (json/read-str (slurp (str lambdacd-project-dir "/api-fetch-temp.json")))))
 
@@ -45,18 +45,6 @@
 
 (println "remote branches: " (get-remote-branches))
 
-(defn mk-projects []
-  (let [running-branches (get-running-branches)]
-    (map #(hash-map
-      :pipeline-url (format "/%s" %)
-      :branch %
-      :port (if (= nil (get running-branches (docker-namify %)))
-        (get-unused-port)
-        (parse-int (get running-branches (docker-namify %)))
-        )
-      :running (not= nil (get running-branches (docker-namify %)))
-    ) (get-remote-branches))))
-
 (defn mk-pipeline-def [{branch :branch port :port}]
   `(
     (either
@@ -64,13 +52,14 @@
       (alias "wait for git repo"
         (wait-for-remote-repo ~branch)))
     (update-git-repo ~branch)
-    (in-parallel
+    (
+      ; in-parallel
       build-docker-image)
     (stop-docker ~branch ~port)
     (start-docker ~branch ~port)))
 
 (defn pipeline-for [project]
-  (print "  creating pipeline-for")
+  (print "  creating pipeline-for ")
   (println project)
   (let [home-dir     (util/create-temp-dir)
         config       { :home-dir home-dir :dont-wait-for-completion false}
@@ -80,17 +69,40 @@
     (runners/start-one-run-after-another pipeline)
     app))
 
-(defn mk-context [project]
-  (let [app (pipeline-for project)] ; don't inline this, otherwise compojure will always re-initialize a pipeline on each HTTP request
-    (compojure/context (:pipeline-url project) [] app)))
+(def branch-pages (atom {}))
 
-(defn mk-contexts []
-  (map mk-context (mk-projects)))
+(defn create-branch-page [branch port]
+  (println "new pipeline: " branch)
+  (let [pipeline (pipeline-for {:branch branch  :port port})]
+    (swap! branch-pages #(assoc % branch pipeline))
+    pipeline))
+
+(defn branch-page [branch port]
+  (let [existing-branch-page (get @branch-pages branch)]
+    (if existing-branch-page
+      existing-branch-page
+      (create-branch-page branch port))))
+
+(defn mk-projects []
+  (let [running-branches (get-running-branches)]
+    (map #(hash-map
+      ; :pipeline-url (format "/branch/%s" %)
+      :branch %
+      :port (if (= nil (get running-branches (docker-namify %)))
+        (get-unused-port)
+        (parse-int (get running-branches (docker-namify %)))
+        )
+      :running (not= nil (get running-branches (docker-namify %)))
+      :page (branch-page % (if (= nil (get running-branches (docker-namify %)))
+        (get-unused-port)
+        (parse-int (get running-branches (docker-namify %)))
+        ))
+    ) (get-remote-branches))))
 
 ;; Index page
-(defn mk-link [{pipeline-url :pipeline-url branch :branch port :port running :running}]
+(defn mk-link [{branch :branch port :port running :running}]
   ; TODO: display date
-  [:li [:a {:href (str pipeline-url "/")} branch]
+  [:li [:a {:href (str "/branch/" branch "/")} branch]
     " -> "
     (if running
       [:a {:href (format "http://localhost:%d" port)} (format "localhost:%d" port)]
@@ -106,29 +118,12 @@
       [:h1 service-name " Pipelines"]
       [:ul (map mk-link (mk-projects))]]]))
 
-(def branch-pages (atom {}))
-
-(defn create-branch-page [name]
-  (println "new pipeline: " name)
-  (let [pipeline (pipeline-for {:branch name  :port (get-unused-port)})]
-    (swap! branch-pages #(assoc % name pipeline))
-    pipeline))
-
-(defn branch-page [name]
-  (let [existing-branch-page (get @branch-pages name)]
-    (if existing-branch-page
-      existing-branch-page
-      (create-branch-page name))))
 
 (defn -main [& args]
   (let [
-        contexts (map mk-context (mk-projects))
-        ; contexts (mk-contexts)
+        projects (doall (mk-projects))
         routes (apply compojure/routes
-          (conj
-            contexts
-            (compojure/context "/branch/:name" [name]
-              (branch-page name))
-            (compojure/GET "/" [] (mk-index))))]
+          (conj [] (compojure/GET "/" [] (mk-index))
+            (compojure/context "/branch/:name" [name] (get @branch-pages name))))]
        (ring-server/serve routes {:open-browser? false
                                :port 8080})))

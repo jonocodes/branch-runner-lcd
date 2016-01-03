@@ -2,8 +2,8 @@
 
 (def service-name "Test App")
 
-(def base-dir "/home/jfinger/ownCloud/lambdaCd/")
-; (def base-dir "/home/jono/files/lambdacd")
+; (def base-dir "/home/jfinger/ownCloud/lambdaCd/")
+(def base-dir "/home/jono/files/lambdacd")
 
 (def remote-repo "git@github.com:jonocodes/lcd-test-app")
 

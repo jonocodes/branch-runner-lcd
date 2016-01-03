@@ -3,9 +3,10 @@
 A continuous delivery pipeline for running git branches of a web service using LambdaCD.
 
 ## Requirements
+* LambdaCD
+* git
 * docker
 * docker-compose
-* LambdaCD
 
 ## Usage
 
@@ -24,6 +25,9 @@ Checkout the git project(s) from github and then set the values in config.clj
 
 ## TODO
 
+* fetch remote branches from local repo instead of github api
+* generate a list of ports for each stack instead of one
+* move docker commands into config instead of in steps
 * add contexts dynamically when branches are created
 
 Index page:
