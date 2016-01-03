@@ -14,19 +14,20 @@
       (format "git checkout %s" branch)
       "git pull")))
 
-(defn build-docker-image [args ctx]
-  (shell/bash ctx lambdacd-dockerfiles-dir
-    "docker build -t lcdapp ."))
-
-(defn start-docker [branch port]
+(defn build-stack [dir]
   (fn [args ctx]
-    (shell/bash ctx lambdacd-dockerfiles-dir
-      (format "WEB_PORT=%d docker-compose -p %s up -d" port branch))
+    (shell/bash ctx dir
+      (build-stack-command))
     {:status :success}))
 
-(defn stop-docker [branch port]
+(defn start-stack [envs dir branch port]
   (fn [args ctx]
-    (shell/bash ctx lambdacd-dockerfiles-dir
-      ; TODO: curry this in with a function and use PORT_HTTP_WEB
-      (format "WEB_PORT=%d docker-compose -p %s stop" port branch))
+    (shell/bash ctx dir
+      (start-stack-command envs branch port))
+    {:status :success}))
+
+(defn stop-stack [envs dir branch port]
+  (fn [args ctx]
+    (shell/bash ctx dir
+      (stop-stack-command envs branch port))
     {:status :success}))

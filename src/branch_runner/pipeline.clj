@@ -17,8 +17,11 @@
         [clojure.tools.logging :as log]
         [lambdacd.steps.manualtrigger :as manualtrigger]
         [lambdacd.steps.support :refer [capture-output]]
-        [clojure.data.json :as json])
+        [clojure.data.json :as json]
+        ; [clj-yaml.core :as yaml]
+        )
   (:gen-class))
+
 
 (defn parse-int [s]
   (Integer. (re-find #"[0-9]*" s)))
@@ -52,14 +55,12 @@
       (alias "wait for git repo"
         (wait-for-remote-repo ~branch)))
     (update-git-repo ~branch)
-    (
-      ; in-parallel
-      build-docker-image)
-    (stop-docker ~branch ~port)
-    (start-docker ~branch ~port)))
+    (build-stack dockerfiles-dir)
+    (stop-stack "" dockerfiles-dir ~branch ~port)
+    (start-stack "" dockerfiles-dir ~branch ~port)))
 
 (defn pipeline-for [project]
-  (print "  creating pipeline-for ")
+  (print "creating pipeline-for ")
   (println project)
   (let [home-dir     (util/create-temp-dir)
         config       { :home-dir home-dir :dont-wait-for-completion false}
@@ -72,7 +73,7 @@
 (def branch-pages (atom {}))
 
 (defn create-branch-page [branch port]
-  (println "new pipeline: " branch)
+  ; (println "new pipeline: " branch)
   (let [pipeline (pipeline-for {:branch branch  :port port})]
     (swap! branch-pages #(assoc % branch pipeline))
     pipeline))
@@ -83,10 +84,12 @@
       existing-branch-page
       (create-branch-page branch port))))
 
+; (defn get-ports-map []
+;   )
+
 (defn mk-projects []
   (let [running-branches (get-running-branches)]
     (map #(hash-map
-      ; :pipeline-url (format "/branch/%s" %)
       :branch %
       :port (if (= nil (get running-branches (docker-namify %)))
         (get-unused-port)

@@ -9,16 +9,26 @@
 
 (def lambdacd-project-dir (str base-dir "/branch-runner-lcd"))
 
-(def lambdacd-dockerfiles-dir (str base-dir "/lcd-test-app"))
+(def dockerfiles-dir (str base-dir "/lcd-test-app"))
 
 (def local-git-dir (str base-dir "/lcd-test-app"))
 
-; (def github-api-branch-list "https://api.github.com/repos/jonocodes/lcd-test-app/branches")
+(defn build-stack-command []
+  "docker build -t lcdapp .")
 
-; (def projects [{:pipeline-url "/develop"
-;                 :branch "develop"
-;                 :port   2222}
-;                {:pipeline-url "/feature-foo"
-;                 :branch "feature-foo"
-;                 :port   3333}
-;                 ])
+(defn start-stack-command [envs branch port]
+  (format "WEB_PORT=%d docker-compose -p %s up -d" port branch))
+
+(defn stop-stack-command [envs branch port]
+  (format "WEB_PORT=%d docker-compose -p %s stop" port branch))
+
+; TODO: generate this from compose file
+(def required-ports {
+    :web {
+        :WEB_PORT 0
+        :PORT_HTTP_WEB 0
+    },
+    :redis {
+      :PORT_TCP_REDIS 0
+    }
+  })
