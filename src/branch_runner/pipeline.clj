@@ -23,6 +23,16 @@
   (:gen-class))
 
 
+; (defn populate-ports [required-ports]
+;   (let [stack required-ports]
+;     (println stack)
+;     (for [[service ports] stack]
+;       ((println service ports) 5))
+;     )
+;   )
+;
+; (populate-ports required-ports)
+
 (defn parse-int [s]
   (Integer. (re-find #"[0-9]*" s)))
 
@@ -37,9 +47,9 @@
     (if (= 0 (count docker-list)) {}
       (apply hash-map (.split docker-list"\t")))))
 
-(defn get-remote-branches []  ; TODO: query git repo with 'branch --remote' instead
-  (map #(get % "name")
-    (json/read-str (slurp (str lambdacd-project-dir "/api-fetch-temp.json")))))
+(defn get-remote-branches []
+  (clojure.string/split-lines (:out (sh "sh" "-c" (format
+    "git --git-dir=%s/.git branch --remote|sed 's/[^/]*\\///'" local-git-dir)))))
 
 (defn docker-namify [branch]  ; turn into a name that is a valid for a docker container
   (clojure.string/replace branch #"[^a-zA-Z0-9_]" ""))

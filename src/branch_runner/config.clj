@@ -10,6 +10,7 @@
 (def lambdacd-project-dir (str base-dir "/branch-runner-lcd"))
 
 (def dockerfiles-dir (str base-dir "/lcd-test-app"))
+; (def dockerfiles-dir (str base-dir "/branch-runner-lcd/lcd-test-app"))
 
 (def local-git-dir (str base-dir "/lcd-test-app"))
 
@@ -25,8 +26,8 @@
 ; TODO: generate this from compose file
 (def required-ports {
     :web {
-        :WEB_PORT 0
-        :PORT_HTTP_WEB 0
+      :WEB_PORT 0
+      :PORT_HTTP_WEB 0
     },
     :redis {
       :PORT_TCP_REDIS 0
